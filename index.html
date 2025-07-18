@@ -76,18 +76,40 @@
           }
         }
       },
-      editForm: {
-        titleBinding: "title",
-        elements: [
-          { type: 'textbox', label: 'Tên', binding: 'name' },
-          { type: 'textbox', label: 'Chức vụ', binding: 'title' }
-        ]
-      },
+    editForm: {
+  titleBinding: "title",
+  elements: [
+    { type: 'textbox', label: 'Tên', binding: 'name' },
+    { type: 'textbox', label: 'Chức vụ', binding: 'title' },
+    { type: 'textbox', label: 'Số điện thoại', binding: 'phone' },  // Thêm trường Số điện thoại
+    { type: 'textbox', label: 'Nhiệm vụ', binding: 'task' }  // Thêm trường Nhiệm vụ
+  ]
+}
       nodeMenu: {
-        edit: { text: "Chỉnh sửa" },
-        add: { text: "Thêm cấp dưới" },
-        remove: { text: "Xóa" }
-      },
+  edit: { 
+    text: "Chỉnh sửa", 
+    click: function (event, node) {
+      // Sau khi người dùng nhấn vào chỉnh sửa, lấy thông tin mới
+      const name = prompt("Nhập tên:", node.name);
+      const title = prompt("Nhập chức vụ:", node.title);
+      const phone = prompt("Nhập số điện thoại:", node.phone || "");
+      const task = prompt("Nhập nhiệm vụ:", node.task || "");
+
+      // Cập nhật thông tin của node
+      node.name = name;
+      node.title = title;
+      node.phone = phone;
+      node.task = task;
+
+      // Lưu lại dữ liệu vào localStorage (hoặc gửi lên server nếu cần)
+      localStorage.setItem('orgchartData', JSON.stringify(chart.nodes));
+      chart.refresh();
+    }
+  },
+  add: { text: "Thêm cấp dưới" },
+  remove: { text: "Xóa" }
+}
+
       nodes: [
         { id: 1, name: "Phạm Xuân Nam", title: "CHỦ TỊCH UBND", tags: ["centered"] },
         { id: 2, pid: 1, name: "Trần Quốc Tuấn", title: "PHÓ CHỦ TỊCH – GIÁM ĐỐC TTHCC", tags: ["centered"] },
