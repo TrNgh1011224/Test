@@ -1,117 +1,98 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Sơ đồ tổ chức UBND - Đầy đủ và có thể chỉnh sửa</title>
-  <script src="https://cdn.jsdelivr.net/npm/orgchart/dist/js/orgchart.min.js"></script> <!-- Sử dụng CDN chính thức của OrgChart.js -->
-  <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-    #tree { width: 100%; height: 100vh; overflow: hidden; position: relative; }
-    .oc-edit-button { margin-top: 10px; font-size: 14px; }
-    #zoom-controls {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-    }
-    #zoom-controls button {
-      font-size: 20px;
-      padding: 5px 10px;
-      background-color: #039be5;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin: 5px;
-      border-radius: 5px;
-    }
-    #zoom-controls button:hover {
-      background-color: #0288d1;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ tổ chức UBND - Đầy đủ và có thể chỉnh sửa</title>
+    <script src="https://cdn.jsdelivr.net/npm/orgchart@2.0.2/dist/js/orgchart.min.js"></script>
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+        #tree { width: 100%; height: 100vh; }
+        .oc-edit-button {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-  <div id="zoom-controls">
-    <button id="expand-all">+</button>
-    <button id="collapse-all">-</button>
-  </div>
+    <div id="tree"></div>
 
-  <div id="tree" class="boc-light">
-    <!-- OrgChart SVG will be rendered here -->
-  </div>
+    <script>
+        // Hàm lưu dữ liệu lên GitHub
+        function saveToGitHub(data) {
+            const repoOwner = 'TrNgh1011224'; // Thay bằng tên người sở hữu repo của bạn
+            const repoName = 'Test'; // Thay bằng tên repo của bạn
+            const filePath = 'path/to/file.json'; // Đường dẫn đến file JSON trong repo của bạn
+            const accessToken = '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'; // Thay bằng token của bạn
 
-  <script>
-    var chart = new OrgChart(document.getElementById("tree"), {
-      template: "ana",
-      enableSearch: true,
-      nodeBinding: {
-        field_0: "name",
-        field_1: "title"
-      },
-      tags: {
-        centered: {
-          node: {
-            name: { align: "center" },
-            title: { align: "center" }
-          }
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+            const headers = {
+                'Authorization': `token ${accessToken}`,
+                'Content-Type': 'application/json'
+            };
+
+            const body = JSON.stringify({
+                message: 'Update org chart data', // Thông điệp commit
+                content: btoa(JSON.stringify(data)) // Chuyển dữ liệu thành base64
+            });
+
+            fetch(url, {
+                method: 'PUT',
+                headers: headers,
+                body: body
+            })
+            .then(response => response.json())
+            .then(data => console.log('Data saved to GitHub:', data))
+            .catch(error => console.error('Error saving data:', error));
         }
-      },
-      editForm: {
-        titleBinding: "title",
-        elements: [
-          { type: 'textbox', label: 'Tên', binding: 'name' },
-          { type: 'textbox', label: 'Chức vụ', binding: 'title' },
-          { type: 'textbox', label: 'Số điện thoại', binding: 'phone' },
-          { type: 'textbox', label: 'Nhiệm vụ', binding: 'task' }
-        ]
-      },
-      nodeMenu: {
-        edit: { 
-          text: "Chỉnh sửa", 
-          click: function (event, node) {
-            const name = prompt("Nhập tên:", node.name);
-            const title = prompt("Nhập chức vụ:", node.title);
-            const phone = prompt("Nhập số điện thoại:", node.phone || "");
-            const task = prompt("Nhập nhiệm vụ:", node.task || "");
-            node.name = name;
-            node.title = title;
-            node.phone = phone;
-            node.task = task;
-            localStorage.setItem('orgchartData', JSON.stringify(chart.nodes));
-            chart.refresh();
-          }
-        },
-        add: { text: "Thêm cấp dưới" },
-        remove: { text: "Xóa" }
-      },
-      nodes: [
-        { id: 1, name: "Phạm Xuân Nam", title: "CHỦ TỊCH UBND", tags: ["centered"] },
-        { id: 2, pid: 1, name: "Trần Quốc Tuấn", title: "PHÓ CHỦ TỊCH – GIÁM ĐỐC TTHCC", tags: ["centered"] },
-        { id: 3, pid: 2, name: "Lê Thị Kiều Trang", title: "PHÓ GIÁM ĐỐC TTHCC", tags: ["centered"] },
-        { id: 4, pid: 1, name: "Nguyễn Thanh Tú", title: "PHÓ CHỦ TỊCH", tags: ["centered"] },
-        { id: 5, pid: 4, name: "Nguyễn Thế Vinh", title: "CHÁNH VP HĐND-UBND", tags: ["centered"] },
-        { id: 6, pid: 5, name: "Nguyễn Lê Trường Hải", title: "PHÓ CHÁNH VP", tags: ["centered"] },
-        // Continue adding other nodes...
-      ]
-    });
 
-    // Expand all nodes (show all subordinates)
-    document.getElementById('expand-all').addEventListener('click', function() {
-      chart.nodes.forEach(function(node) {
-        node._hidden = false; // Show all nodes
-      });
-      chart.refresh(); // Re-render the chart with all nodes visible
-    });
+        // Dữ liệu mẫu (sơ đồ tổ chức)
+        let savedNodes = localStorage.getItem('orgchartData');
+        let nodes = savedNodes ? JSON.parse(savedNodes) : [
+            { id: 1, name: "Phạm Xuân Nam", title: "CHỦ TỊCH UBND", tags: ["centered"] },
+            { id: 2, pid: 1, name: "Trần Quốc Tuấn", title: "PHÓ CHỦ TỊCH – GIÁM ĐỐC TTHCC", tags: ["centered"] },
+            // ... thêm các nút khác vào đây
+        ];
 
-    // Collapse all nodes (hide all subordinates)
-    document.getElementById('collapse-all').addEventListener('click', function() {
-      chart.nodes.forEach(function(node) {
-        if (node.pid) { // If it has a parent (subordinate), hide it
-          node._hidden = true;
-        }
-      });
-      chart.refresh(); // Re-render the chart with only the root nodes visible
-    });
-  </script>
-
+        // Tạo sơ đồ tổ chức
+        var chart = new OrgChart(document.getElementById("tree"), {
+            template: "ana",
+            enableSearch: true,
+            nodeBinding: {
+                field_0: "name",
+                field_1: "title",
+                field_2: "phone"
+            },
+            tags: {
+                centered: {
+                    node: {
+                        name: { align: "center" },
+                        title: { align: "center" }
+                    }
+                }
+            },
+            editForm: {
+                titleBinding: "title",
+                elements: [
+                    { type: 'textbox', label: 'Tên', binding: 'name' },
+                    { type: 'textbox', label: 'Chức vụ', binding: 'title' },
+                    { type: 'textbox', label: 'Số điện thoại', binding: 'phone' }
+                ]
+            },
+            nodeMenu: {
+                edit: { text: "Chỉnh sửa" },
+                add: { text: "Thêm cấp dưới" },
+                remove: { text: "Xóa" }
+            },
+            nodes: nodes,
+            onUpdate: function(sender, oldNode, newNode) {
+                // Lưu lại dữ liệu vào localStorage
+                localStorage.setItem('orgchartData', JSON.stringify(sender.nodes));
+                // Cập nhật dữ liệu lên GitHub
+                saveToGitHub(sender.nodes);
+            }
+        });
+    </script>
 </body>
 </html>
